@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import collections
+import datetime
 import re
 
 from pyramid.httpexceptions import (
@@ -269,6 +270,15 @@ def search(request):
         query = query.filter("terms", classifiers=[classifier])
 
     try:
+        released_range = int(request.params.get("d", 0))
+    except ValueError:
+        released_range = 0
+
+    if released_range:
+        last_week = datetime.datetime.utcnow() - datetime.timedelta(days=released_range)
+        query = query.filter("range", created={"gte": last_week})
+
+    try:
         page_num = int(request.params.get("page", 1))
     except ValueError:
         raise HTTPBadRequest("'page' must be an integer.")
@@ -279,6 +289,20 @@ def search(request):
 
     if page.page_count and page_num > page.page_count:
         return HTTPNotFound()
+
+    by_release_date_filters = (
+        (0, 'All Time'),
+        (1, 'Today'),
+        (7, 'This week'),
+        (30, 'This month'),
+        (90, 'Last 3 months'),
+        (180, 'Last 6 months'),
+        (365, 'Last year'),
+        (730, 'Last 2 years'),
+        (1095, 'Last 3 years'),
+        (1460, 'Last 4 years'),
+        (2190, 'Last 6 years'),
+    )
 
     available_filters = collections.defaultdict(list)
 
@@ -314,6 +338,8 @@ def search(request):
         "order": request.params.get("o", ""),
         "available_filters": sorted(available_filters.items(), key=filter_key),
         "applied_filters": request.params.getall("c"),
+        "by_release_date_filters": by_release_date_filters,
+        "by_release_date": released_range,
     }
 
 

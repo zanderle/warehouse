@@ -101,37 +101,53 @@
           <span class="sr-only">Close</span>
         </button>
         <h2 class="no-top-padding">
-          Filter by classifier
-          <a href="{{ request.route_path('help')}}#trove-classifier"
-             class="tooltipped tooltipped-s"
-             aria-label="What's a trove classifier?"
-             data-original-label="What's a trove classifier?">
-            <i class="fa fa-question-circle" aria-hidden="true"></i>
-            <span class="sr-only">Classifier information<span>
-          </a>
+          Filter
         </h2>
         <form id="classifiers">
-        <input id="search" type="hidden" name="q" value="{{ term }}">
-        <input type="hidden" name="o" value="{{ order }}">
-
-        {% set applied_filters_str = applied_filters|join(' ') %}
-        {% for top_level, classifiers in available_filters %}
-          <div class="accordion{{ ' accordion--closed' if top_level not in applied_filters_str else '' }}">
-            <button type="button" class="accordion__link -js-accordion-trigger">By {{ top_level }}</button>
-            <div class="accordion__content">
-              <div class="checkbox-tree">
-              {% for classifier in classifiers %}
-                <div class="checkbox-tree__item">
-                  {% set sub_levels = classifier.split(' :: ') %}
-                  {{ ("&nbsp;&nbsp;&nbsp;&nbsp;"*(sub_levels|length))|safe }}
-                  <input name="c" type="checkbox" id="{{ classifier }}" class="-js-form-submit-trigger checkbox-tree__checkbox" value="{{ classifier }}" {{ 'checked' if classifier in applied_filters else '' }}>
-                  <label class="checkbox-tree__label" for="{{ classifier }}">{{ sub_levels[-1] }}</label>
-                </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-section__title">By release date</h3>
+            <div class="checkbox-tree">
+              {% for release_date_filter in by_release_date_filters %}
+              <div class="checkbox-tree__item">
+                <input name="d" type="radio" id="release-date-filter-{{ release_date_filter.0 }}" class="-js-form-submit-trigger checkbox-tree__checkbox" value="{{ release_date_filter.0 }}" {{ 'checked' if release_date_filter.0 == by_release_date else '' }}>
+                <label class="checkbox-tree__label" for="release-date-filter-{{ release_date_filter.0 }}">{{ release_date_filter.1 }}</label>
+              </div>
               {% endfor %}
+            </div>
+        </div>
+        <div class="sidebar-section">
+          <h3 class="sidebar-section__title">
+            By classifier
+            <a href="{{ request.route_path('help')}}#trove-classifier"
+               class="tooltipped tooltipped-s"
+               aria-label="What's a trove classifier?"
+               data-original-label="What's a trove classifier?">
+              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              <span class="sr-only">Classifier information<span>
+            </a>
+          </h3>
+          <input id="search" type="hidden" name="q" value="{{ term }}">
+          <input type="hidden" name="o" value="{{ order }}">
+
+          {% set applied_filters_str = applied_filters|join(' ') %}
+          {% for top_level, classifiers in available_filters %}
+            <div class="accordion{{ ' accordion--closed' if top_level not in applied_filters_str else '' }}">
+              <button type="button" class="accordion__link -js-accordion-trigger">By {{ top_level }}</button>
+              <div class="accordion__content">
+                <div class="checkbox-tree">
+                {% for classifier in classifiers %}
+                  <div class="checkbox-tree__item">
+                    {% set sub_levels = classifier.split(' :: ') %}
+                    {{ ("&nbsp;&nbsp;&nbsp;&nbsp;"*(sub_levels|length))|safe }}
+                    <input name="c" type="checkbox" id="{{ classifier }}" class="-js-form-submit-trigger checkbox-tree__checkbox" value="{{ classifier }}" {{ 'checked' if classifier in applied_filters else '' }}>
+                    <label class="checkbox-tree__label" for="{{ classifier }}">{{ sub_levels[-1] }}</label>
+                  </div>
+                {% endfor %}
+                </div>
               </div>
             </div>
-          </div>
-        {% endfor %}
+          {% endfor %}
+        </div>
         </form>
       </aside>
     </div>
